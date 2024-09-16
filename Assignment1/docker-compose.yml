@@ -6,9 +6,12 @@ services:
       - "5001:5001"
     environment:
       - FLASK_ENV=development
-      - FLASK_APP=app
+      - FLASK_APP=flask_blog/app
       - FLASK_RUN_PORT=5001
       - FLASK_RUN_HOST=0.0.0.0
-  # test:
-  #   build: .
-  #   command: echo "Tests passed!"
+
+  test:
+    build: .
+    # volumes:
+    #   - .:/app
+    command: pytest test_blog.py

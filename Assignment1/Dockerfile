@@ -10,14 +10,8 @@ COPY . /app
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Expose the port the app runs on
-# EXPOSE 5001
+# RUN apt-get update && apt-get install -y vim
 
-# # Set environment variables
-# ENV FLASK_APP=app
-# ENV FLASK_ENV=development
-# ENV FLASK_RUN_PORT=5001
-# ENV FLASK_RUN_HOST=0.0.0.0
-
-# Run the Flask app
+# CMD ["sh", "-c", "python init_db.py && flask run && pyrun test_blog.py"]
+# # Run the Flask app
 CMD ["flask", "run"]

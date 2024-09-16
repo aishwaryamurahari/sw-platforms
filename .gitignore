@@ -4,3 +4,5 @@
 */**/*.pyd
 */**/venv
 */**/*.db 
+*/**/.vagrant
+.DS_Store

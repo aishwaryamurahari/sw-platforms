@@ -7,6 +7,45 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
+# def init_db(conn=None):
+#     if conn is None:
+#         conn = get_db_connection()
+#     conn.execute('''
+#         CREATE TABLE posts (
+#             id INTEGER PRIMARY KEY AUTOINCREMENT,
+#             created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+#             title TEXT NOT NULL,
+#             content TEXT NOT NULL
+#         );
+#     ''')
+#     conn.commit()
+
+# def init_db(conn=None):
+#     if conn is None:
+#         conn = get_db_connection()
+#     with app.open_resource('schema.sql', mode='r') as f:
+#         conn.executescript(f.read())
+#     conn.commit()
+
+def init_db(connection=None):
+    if connection is None:
+        connection = sqlite3.connect('database.db')
+        
+    with open('flask_blog/schema.sql') as f:
+        connection.executescript(f.read())
+ 
+    cur = connection.cursor()
+
+    cur.execute("INSERT INTO posts (title, content) VALUES (?, ?)",
+                ('First Post', 'Content for the first post')
+                )
+
+    cur.execute("INSERT INTO posts (title, content) VALUES (?, ?)",
+                ('Second Post', 'Content for the second post')
+                )
+
+    connection.commit()
+    connection.close()
 
 def get_post(post_id):
     conn = get_db_connection()
@@ -17,9 +56,18 @@ def get_post(post_id):
     return post
 
 
-def create_app():
+def create_app(test_config=None):
     app = Flask(__name__)
+    init_db()
     app.config['SECRET_KEY'] = 'mykeyforflaskapp'
+
+    if test_config is not None:
+        app.config.update(test_config)
+    
+    if app.config.get('TESTING'):
+        app.config['DATABASE'] = ':memory:'
+    else:
+        app.config['DATABASE'] = 'database.db'
 
     @app.route('/')
     def index():
