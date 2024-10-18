@@ -10,8 +10,5 @@ COPY . /app
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# RUN apt-get update && apt-get install -y vim
-
-# CMD ["sh", "-c", "python init_db.py && flask run && pyrun test_blog.py"]
 # # Run the Flask app
 CMD ["flask", "run"]
