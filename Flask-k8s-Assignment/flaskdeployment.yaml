@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: web-service
+  template:
+    metadata:
+      labels:
+        app: web-service
+    spec:
+      containers:
+      - name: web-service
+        image: ghcr.io/aishwaryamurahari/web-service:latest
+        ports:
+        - containerPort: 5002
+      imagePullSecrets:
+      - name: regcred

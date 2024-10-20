@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db-service
+  template:
+    metadata:
+      labels:
+        app: db-service
+    spec:
+      containers:
+      - name: db-service
+        image: ghcr.io/aishwaryamurahari/db-service:latest
+      imagePullSecrets:
+      - name: regcred
