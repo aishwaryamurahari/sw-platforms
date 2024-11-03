@@ -12,7 +12,6 @@ const ChatRoom = () => {
     }
 
     useEffect(() => {
-        // Connect to WebSocket server
         const ws = new WebSocket('ws://localhost:8080/chat');
         
         ws.onopen = () => {
@@ -20,6 +19,7 @@ const ChatRoom = () => {
         };
 
         ws.onmessage = (event) => {
+            // Only handle received messages (not our own)
             setMessages(prev => [...prev, {
                 text: event.data,
                 type: 'received'
@@ -36,7 +36,6 @@ const ChatRoom = () => {
 
         setWebsocket(ws);
 
-        // Cleanup on component unmount
         return () => {
             ws.close();
         };
@@ -49,11 +48,15 @@ const ChatRoom = () => {
     const sendMessage = (e) => {
         e.preventDefault();
         if (inputMessage.trim() && websocket) {
-            websocket.send(inputMessage);
+            // First add the message to our local state
             setMessages(prev => [...prev, {
                 text: inputMessage,
                 type: 'sent'
             }]);
+            
+            // Then send it through WebSocket
+            websocket.send(inputMessage);
+            
             setInputMessage('');
         }
     };

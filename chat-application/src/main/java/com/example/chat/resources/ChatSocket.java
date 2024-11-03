@@ -107,7 +107,7 @@ public class ChatSocket {
     public void onMessage(String message, Session session) throws IOException {
         System.out.println("Message received: " + message);
         for (Session client : clients) {
-            if (client.isOpen()) {
+            if (client.isOpen() && !client.equals(session)) {
                 try {
                     client.getBasicRemote().sendText(message);
                 } catch (IOException e) {
