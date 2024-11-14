@@ -54,13 +54,11 @@ workflows:
     jobs:
       - build:
           filters:
-            paths:
-              only:
-                - "chat-app/"
+            branches:
+              only: devops_assignment
       - deploy:
           requires:
             - build
           filters:
-            paths:
-              only:
-                - "chat-app/"
+            branches:
+              only: devops_assignment
