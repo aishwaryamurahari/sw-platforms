@@ -1,31 +1,39 @@
 version: 2.1
+
 jobs:
   build:
     docker:
       - image: circleci/node:14
+    working_directory: ~/repo/chat-app
     steps:
       - checkout
       - restore_cache:
           keys:
-            - v1-dependencies-{{ checksum "package.json" }}
+            - v1-dependencies-{{ checksum "chat-app/chat-frontend/package.json" }}
             - v1-dependencies-
       - run:
           name: Install Dependencies
-          command: npm install
+          command: |
+            cd chat-app/chat-frontend && npm install
+            cd ../chat-backend && npm install
       - save_cache:
           paths:
-            - node_modules
-          key: v1-dependencies-{{ checksum "package.json" }}
+            - chat-app/chat-frontend/node_modules
+            - chat-app/chat-backend/node_modules
+          key: v1-dependencies-{{ checksum "chat-app/chat-frontend/package.json" }}
       - run:
-          name: Run Tests
-          command: npm test
+          name: Run Frontend Tests
+          command: cd chat-app/chat-frontend && npm test
       - run:
-          name: Build Application
-          command: npm run build
+          name: Run Backend Tests
+          command: cd chat-app/chat-backend && npm test
+      - run:
+          name: Build Frontend
+          command: cd chat-app/chat-frontend && npm run build
       - persist_to_workspace:
           root: .
           paths:
-            - .
+            - chat-app
 
   deploy:
     docker:
@@ -34,14 +42,25 @@ jobs:
       - attach_workspace:
           at: /workspace
       - run:
-          name: Deploy Application
-          command: echo "Deploy steps here (e.g., upload build files, restart server, etc.)"
+          name: Prepare for Deployment
+          command: |
+            echo "Building application and saving artifacts for local deployment"
+            cd /workspace/chat-app/chat-frontend && npm install && npm run build
+            cd /workspace/chat-app/chat-backend && npm install
 
 workflows:
   version: 2
   build_and_deploy:
     jobs:
-      - build
+      - build:
+          filters:
+            paths:
+              only:
+                - "chat-app/"
       - deploy:
           requires:
             - build
+          filters:
+            paths:
+              only:
+                - "chat-app/"
