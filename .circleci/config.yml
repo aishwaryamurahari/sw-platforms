@@ -76,15 +76,15 @@ workflows:
       - frontend-build:
           filters:
             branches:
-              only: main
+              only: devops_assignment
       - backend-build:
           filters:
             branches:
-              only: main
+              only: devops_assignment
       - deploy:
           requires:
             - frontend-build
             - backend-build
           filters:
             branches:
-              only: main
+              only: devops_assignment
