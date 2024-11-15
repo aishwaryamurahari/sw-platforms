@@ -1,24 +1,19 @@
-import io.dropwizard.testing.junit5.DropwizardAppExtension;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.RegisterExtension;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+// import { render, screen } from '@testing-library/react';
+// import App from './App';
 
-public class AppTest {
+// test('renders learn react link', () => {
+//   render(<App />);
+//   const linkElement = screen.getByText(/learn react/i);
+//   expect(linkElement).toBeInTheDocument();
+// });
 
-    @RegisterExtension
-    public static final DropwizardAppExtension<ChatConfiguration> APP =
-            new DropwizardAppExtension<>(ChatApplication.class, "config.yml");
+import { render, screen } from '@testing-library/react';
+import App from './App';
 
-    @Test
-    public void testAppStartsSuccessfully() {
-        // Verify that the application context is not null
-        assertNotNull(APP.getApplication(), "The application should start and not be null");
-    }
-
-    @Test
-    public void testConfigurationLoads() {
-        // Verify that the configuration is loaded successfully
-        ChatConfiguration config = APP.getConfiguration();
-        assertNotNull(config, "Configuration should not be null");
-    }
-}
+test('renders learn react link', async () => {
+  await act(async () => {
+    render(<App />);
+  });
+  const linkElement = screen.getByText(/learn react/i);
+  expect(linkElement).toBeInTheDocument();
+});
