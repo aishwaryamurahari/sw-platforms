@@ -15,6 +15,18 @@
         </configuration>
       </plugin>
       <plugin>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.2.0</version>
+        <configuration>
+          <archive>
+            <manifest>
+              <addClasspath>true</addClasspath>
+              <mainClass>com.example.chat.ChatApplication</mainClass>
+            </manifest>
+          </archive>
+        </configuration>
+      </plugin>
+      <plugin>
         <artifactId>maven-shade-plugin</artifactId>
         <version>3.5.1</version>
         <executions>
@@ -24,10 +36,14 @@
               <goal>shade</goal>
             </goals>
             <configuration>
+              <shadedArtifactAttached>true</shadedArtifactAttached>
               <transformers>
                 <transformer />
                 <transformer>
                   <mainClass>com.example.chat.ChatApplication</mainClass>
+                </transformer>
+                <transformer>
+                  <resource>META-INF/services/io.dropwizard.core.Application</resource>
                 </transformer>
               </transformers>
             </configuration>

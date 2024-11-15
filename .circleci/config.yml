@@ -1,7 +1,24 @@
 version: 2.1
 
+# Define reusable commands
+commands:
+  docker-build-push:
+    parameters:
+      dockerfile:
+        type: string
+      image_name:
+        type: string
+    steps:
+      - run:
+          name: Build and Push Docker image
+          command: |
+            docker build -t $DOCKER_USERNAME/<< parameters.image_name >>:${CIRCLE_SHA1} -f << parameters.dockerfile >> .
+            docker tag $DOCKER_USERNAME/<< parameters.image_name >>:${CIRCLE_SHA1} $DOCKER_USERNAME/<< parameters.image_name >>:latest
+            echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+            docker push $DOCKER_USERNAME/<< parameters.image_name >>:${CIRCLE_SHA1}
+            docker push $DOCKER_USERNAME/<< parameters.image_name >>:latest
+
 jobs:
-  # Job for building and testing the frontend (React)
   frontend-build:
     docker:
       - image: circleci/node:14
@@ -29,9 +46,8 @@ jobs:
           root: .
           paths:
             - chat-app/chat-frontend/build
-            - chat-app/chat-frontend/node_modules
+            - chat-app/chat-frontend/Dockerfile
 
-  # Job for building and testing the backend (Dropwizard)
   backend-build:
     docker:
       - image: cimg/openjdk:17.0
@@ -59,27 +75,45 @@ jobs:
           root: .
           paths:
             - chat-app/chat-backend/target
+            - chat-app/chat-backend/Dockerfile
 
-  # Job for deployment or packaging
   deploy:
     docker:
-      - image: cimg/openjdk:17.0
+      - image: cimg/kubectl:1.24
     working_directory: ~/repo
     steps:
       - checkout
+      - setup_remote_docker
       - attach_workspace:
           at: ~/repo
+      - docker-build-push:
+          dockerfile: chat-app/chat-frontend/Dockerfile
+          image_name: chat-frontend
+      - docker-build-push:
+          dockerfile: chat-app/chat-backend/Dockerfile
+          image_name: chat-backend
       - run:
-          name: Prepare Artifacts for Deployment
+          name: Install kubectl and configure
           command: |
-            echo "Packaging frontend and backend for deployment"
-            ls -la chat-app/chat-frontend/build
-            ls -la chat-app/chat-backend/target
-            # Add your deployment commands here
+            echo $KUBE_CONFIG | base64 -d > kubeconfig.yaml
+            export KUBECONFIG=kubeconfig.yaml
+      - run:
+          name: Deploy to Kubernetes
+          command: |
+            # Update deployments with new image versions
+            kubectl set image deployment/chat-frontend \
+              frontend=$DOCKER_USERNAME/chat-frontend:${CIRCLE_SHA1} --record
+            
+            kubectl set image deployment/chat-backend \
+              backend=$DOCKER_USERNAME/chat-backend:${CIRCLE_SHA1} --record
+            
+            # Wait for rollout to complete
+            kubectl rollout status deployment/chat-frontend
+            kubectl rollout status deployment/chat-backend
 
 workflows:
   version: 2
-  build_and_deploy:
+  build-and-deploy:
     jobs:
       - frontend-build
       - backend-build

@@ -10,7 +10,7 @@ public class AppTest {
 
     @RegisterExtension
     public static final DropwizardAppExtension<ChatConfiguration> APP =
-            new DropwizardAppExtension<>(ChatApplication.class, "src/main/java/com/example/chat/resources/config.yml");
+            new DropwizardAppExtension<>(ChatApplication.class, "config.yml");
 
     @Test
     public void testAppStartsSuccessfully() {
