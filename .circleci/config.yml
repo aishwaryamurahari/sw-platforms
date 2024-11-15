@@ -26,9 +26,10 @@ jobs:
           name: Build Frontend
           command: cd chat-app/chat-frontend && npm run build
       - persist_to_workspace:
-          root: ~/repo
+          root: .
           paths:
-            - chat-app/chat-frontend
+            - chat-app/chat-frontend/build
+            - chat-app/chat-frontend/node_modules
 
   # Job for building and testing the backend (Dropwizard)
   backend-build:
@@ -46,30 +47,35 @@ jobs:
           command: cd chat-app/chat-backend && mvn install -DskipTests
       - save_cache:
           paths:
-            - chat-app/chat-backend/.m2
+            - ~/.m2
           key: backend-dependencies-{{ checksum "chat-app/chat-backend/pom.xml" }}
       - run:
           name: Run Backend Tests
           command: cd chat-app/chat-backend && mvn test
+      - run:
+          name: Build Backend
+          command: cd chat-app/chat-backend && mvn package
       - persist_to_workspace:
-          root: ~/repo
+          root: .
           paths:
-            - chat-app/chat-backend
+            - chat-app/chat-backend/target
 
-  # Job for deployment or packaging (if needed)
+  # Job for deployment or packaging
   deploy:
     docker:
       - image: cimg/openjdk:17.0
+    working_directory: ~/repo
     steps:
+      - checkout
       - attach_workspace:
-          at: /workspace
+          at: ~/repo
       - run:
           name: Prepare Artifacts for Deployment
           command: |
             echo "Packaging frontend and backend for deployment"
-            ls /workspace/chat-app/chat-frontend
-            ls /workspace/chat-app/chat-backend
-            # Include additional deployment commands if needed
+            ls -la chat-app/chat-frontend/build
+            ls -la chat-app/chat-backend/target
+            # Add your deployment commands here
 
 workflows:
   version: 2
