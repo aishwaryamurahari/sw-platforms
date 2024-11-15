@@ -5,7 +5,7 @@ jobs:
   frontend-build:
     docker:
       - image: circleci/node:14
-    working_directory: ~/repo/chat-app/chat-frontend
+    working_directory: ~/repo
     steps:
       - checkout
       - restore_cache:
@@ -26,7 +26,7 @@ jobs:
           name: Build Frontend
           command: cd chat-app/chat-frontend && npm run build
       - persist_to_workspace:
-          root: .
+          root: ~/repo
           paths:
             - chat-app/chat-frontend
 
@@ -34,7 +34,7 @@ jobs:
   backend-build:
     docker:
       - image: cimg/openjdk:17.0
-    working_directory: ~/repo/chat-app/chat-backend
+    working_directory: ~/repo
     steps:
       - checkout
       - restore_cache:
@@ -52,7 +52,7 @@ jobs:
           name: Run Backend Tests
           command: cd chat-app/chat-backend && mvn test
       - persist_to_workspace:
-          root: .
+          root: ~/repo
           paths:
             - chat-app/chat-backend
 
@@ -67,6 +67,8 @@ jobs:
           name: Prepare Artifacts for Deployment
           command: |
             echo "Packaging frontend and backend for deployment"
+            ls /workspace/chat-app/chat-frontend
+            ls /workspace/chat-app/chat-backend
             # Include additional deployment commands if needed
 
 workflows:
