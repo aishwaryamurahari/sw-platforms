@@ -5,56 +5,56 @@ jobs:
   frontend-build:
     docker:
       - image: circleci/node:14
-    working_directory: ~/repo/chat-frontend
+    working_directory: ~/repo/chat-app/chat-frontend
     steps:
       - checkout
       - restore_cache:
           keys:
-            - frontend-dependencies-{{ checksum "chat-frontend/package.json" }}
+            - frontend-dependencies-{{ checksum "chat-app/chat-frontend/package.json" }}
             - frontend-dependencies-
       - run:
           name: Install Frontend Dependencies
-          command: cd chat-frontend && npm install
+          command: cd chat-app/chat-frontend && npm install
       - save_cache:
           paths:
-            - chat-frontend/node_modules
-          key: frontend-dependencies-{{ checksum "chat-frontend/package.json" }}
+            - chat-app/chat-frontend/node_modules
+          key: frontend-dependencies-{{ checksum "chat-app/chat-frontend/package.json" }}
       - run:
           name: Run Frontend Tests
-          command: cd chat-frontend && npm test
+          command: cd chat-app/chat-frontend && npm test
       - run:
           name: Build Frontend
-          command: cd chat-frontend && npm run build
+          command: cd chat-app/chat-frontend && npm run build
       - persist_to_workspace:
           root: .
           paths:
-            - chat-frontend
+            - chat-app/chat-frontend
 
   # Job for building and testing the backend (Dropwizard)
   backend-build:
     docker:
       - image: circleci/openjdk:11
-    working_directory: ~/repo/chat-backend
+    working_directory: ~/repo/chat-app/chat-backend
     steps:
       - checkout
       - restore_cache:
           keys:
-            - backend-dependencies-{{ checksum "chat-backend/pom.xml" }}
+            - backend-dependencies-{{ checksum "chat-app/chat-backend/pom.xml" }}
             - backend-dependencies-
       - run:
           name: Install Backend Dependencies
-          command: cd chat-backend && mvn install -DskipTests
+          command: cd chat-app/chat-backend && mvn install -DskipTests
       - save_cache:
           paths:
-            - chat-backend/.m2
-          key: backend-dependencies-{{ checksum "chat-backend/pom.xml" }}
+            - chat-app/chat-backend/.m2
+          key: backend-dependencies-{{ checksum "chat-app/chat-backend/pom.xml" }}
       - run:
           name: Run Backend Tests
-          command: cd chat-backend && mvn test
+          command: cd chat-app/chat-backend && mvn test
       - persist_to_workspace:
           root: .
           paths:
-            - chat-backend
+            - chat-app/chat-backend
 
   # Job for deployment or packaging (if needed)
   deploy:
