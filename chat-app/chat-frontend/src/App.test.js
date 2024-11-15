@@ -1,21 +1,24 @@
-// import { render, screen } from '@testing-library/react';
-// import App from './App';
+import io.dropwizard.testing.junit5.DropwizardAppExtension;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-// test('renders learn react link', () => {
-//   render(<App />);
-//   const linkElement = screen.getByText(/learn react/i);
-//   expect(linkElement).toBeInTheDocument();
-// });
+public class AppTest {
 
-import { render, screen } from '@testing-library/react';
-import App from './App';
+    @RegisterExtension
+    public static final DropwizardAppExtension<ChatConfiguration> APP =
+            new DropwizardAppExtension<>(ChatApplication.class, "config.yml");
 
-// Mock ChatRoom component to prevent issues with untested child components
-jest.mock('./components/ChatRoom', () => () => <div data-testid="chatroom">Chat Room</div>);
+    @Test
+    public void testAppStartsSuccessfully() {
+        // Verify that the application context is not null
+        assertNotNull(APP.getApplication(), "The application should start and not be null");
+    }
 
-test('renders ChatRoom component', () => {
-  render(<App />);
-  const chatRoomElement = screen.getByTestId('chatroom');
-  expect(chatRoomElement).toBeInTheDocument();
-});
-
+    @Test
+    public void testConfigurationLoads() {
+        // Verify that the configuration is loaded successfully
+        ChatConfiguration config = APP.getConfiguration();
+        assertNotNull(config, "Configuration should not be null");
+    }
+}
