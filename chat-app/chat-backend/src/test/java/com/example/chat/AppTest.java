@@ -1,8 +1,11 @@
-import io.dropwizard.testing.junit5.DropwizardAppExtension;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import com.example.chat.ChatApplication;
+import com.example.chat.ChatConfiguration;
+
+import io.dropwizard.testing.junit5.DropwizardAppExtension;
 public class AppTest {
 
     @RegisterExtension
