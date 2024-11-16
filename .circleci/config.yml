@@ -106,7 +106,7 @@ jobs:
           command: |
             echo $KUBE_CONFIG | base64 -d > kubeconfig.yaml
             export KUBECONFIG=kubeconfig.yaml
-            kubectl apply -f k8s/manifests.yaml
+            kubectl apply -f chat-app/k8s/manifests.yaml
             kubectl rollout status deployment/chat-frontend
             kubectl rollout status deployment/chat-backend
 
