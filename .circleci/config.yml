@@ -1,6 +1,5 @@
 version: 2.1
 
-# Define reusable commands
 commands:
   docker-build-push:
     parameters:
@@ -25,6 +24,7 @@ jobs:
     working_directory: ~/repo
     steps:
       - checkout
+      - setup_remote_docker
       - restore_cache:
           keys:
             - frontend-dependencies-{{ checksum "chat-app/chat-frontend/package.json" }}
@@ -54,6 +54,7 @@ jobs:
     working_directory: ~/repo
     steps:
       - checkout
+      - setup_remote_docker
       - restore_cache:
           keys:
             - backend-dependencies-{{ checksum "chat-app/chat-backend/pom.xml" }}
@@ -79,13 +80,21 @@ jobs:
 
   deploy:
     docker:
-      - image: cimg/kubectl:1.24
+      # Using a different base image that includes both Docker and kubectl
+      - image: google/cloud-sdk:latest
     working_directory: ~/repo
     steps:
       - checkout
       - setup_remote_docker
       - attach_workspace:
           at: ~/repo
+      - run:
+          name: Install kubectl
+          command: |
+            apt-get install -y curl
+            curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+            chmod +x kubectl
+            mv kubectl /usr/local/bin/
       - docker-build-push:
           dockerfile: chat-app/chat-frontend/Dockerfile
           image_name: chat-frontend
@@ -93,21 +102,11 @@ jobs:
           dockerfile: chat-app/chat-backend/Dockerfile
           image_name: chat-backend
       - run:
-          name: Install kubectl and configure
+          name: Deploy to Kubernetes
           command: |
             echo $KUBE_CONFIG | base64 -d > kubeconfig.yaml
             export KUBECONFIG=kubeconfig.yaml
-      - run:
-          name: Deploy to Kubernetes
-          command: |
-            # Update deployments with new image versions
-            kubectl set image deployment/chat-frontend \
-              frontend=$DOCKER_USERNAME/chat-frontend:${CIRCLE_SHA1} --record
-            
-            kubectl set image deployment/chat-backend \
-              backend=$DOCKER_USERNAME/chat-backend:${CIRCLE_SHA1} --record
-            
-            # Wait for rollout to complete
+            kubectl apply -f k8s/manifests.yaml
             kubectl rollout status deployment/chat-frontend
             kubectl rollout status deployment/chat-backend
 
