@@ -6,5 +6,6 @@
 */**/*.db 
 */**/.vagrant
 */**/*.box
-
+*/**/test_config.base64
+*/**/test_kubeconfig
 .DS_Store
